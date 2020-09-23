@@ -22,8 +22,8 @@
     "prettier": "^2.0.4"
   },
   "scripts": {
-    "build": "node-gyp build",
-    "build:dev": "node-gyp build --debug",
+    "build": "MACOSX_DEPLOYMENT_TARGET=10.15 node-gyp build",
+    "build:dev": "MACOSX_DEPLOYMENT_TARGET=10.15 node-gyp build --debug",
     "clean": "node-gyp clean",
     "lint": "prettier --check '**/*.js'",
     "format": "clang-format -i main.mm AppleLogin.m ApleLogin.h && prettier --write '**/*.js'",
