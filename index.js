@@ -1,8 +1,8 @@
 const appleLogin = require('bindings')('main.node')
 
-const signInWithApple = (mainWindow) => {
+const signInWithApple = async (mainWindow) => {
   console.log('main window', mainWindow);
-  appleLogin.signInWithApple(mainWindow);
+  return await appleLogin.signInWithApple(mainWindow);
 }
 
 module.exports = {

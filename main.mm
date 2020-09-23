@@ -29,11 +29,16 @@ Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
 
   AppleLogin *appleLogin = [[AppleLogin alloc] initWithWindow:win];
 
-  NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
-    deferred.Resolve(result);
-  } errorHandler:^(NSError * _Nonnull error) {
-    deferred.Reject(error);
-  }];
+  Napi::Object obj = Napi::Object::New(env);
+
+  obj.Set("hello", "world");
+  deferred.Resolve(obj);
+
+  //NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
+  //  deferred.Resolve(result);
+  //} errorHandler:^(NSError * _Nonnull error) {
+  //  //deferred.Reject(error);
+  //}];
 
   return deferred.Promise();
 }
