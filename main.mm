@@ -29,11 +29,25 @@ Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
 
   AppleLogin *appleLogin = [[AppleLogin alloc] initWithWindow:win];
 
-  Napi::Object obj = Napi::Object::New(env);
-
-  obj.Set("hello", "world");
-
   NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
+    Napi::Object obj = Napi::Object::New(env);
+    obj.Set("idToken",
+                std::string([result objectForKey:@"identityToken"]
+                                ? [[result objectForKey:@"identityToken"] UTF8String]
+                                : ""));
+
+    obj.Set("firstName",
+                std::string([result objectForKey:@"firstName"]
+                                ? [[result objectForKey:@"firstName"] UTF8String]
+                                : ""));
+    obj.Set("lastName",
+                std::string([result objectForKey:@"lastName"]
+                                ? [[result objectForKey:@"lastName"] UTF8String]
+                                : ""));
+    obj.Set("email",
+                std::string([result objectForKey:@"email"]
+                                ? [[result objectForKey:@"email"] UTF8String]
+                                : ""));
     deferred.Resolve(obj);
   } errorHandler:^(NSError * _Nonnull error) {
     // NSString *nsErr = error.localizedDescription;
