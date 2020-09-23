@@ -17,6 +17,7 @@
     "node-addon-api": "^3.0.2"
   },
   "devDependencies": {
+    "clang-format": "^1.4.0",
     "node-gyp": "^7.1.0",
     "prettier": "^2.0.4"
   },
@@ -25,10 +26,18 @@
     "build:dev": "node-gyp build --debug",
     "clean": "node-gyp clean",
     "lint": "prettier --check '**/*.js'",
-    "format": "clang-format -i main.mm && prettier --write '**/*.js'",
+    "format": "clang-format -i main.mm AppleLogin.m ApleLogin.h && prettier --write '**/*.js'",
     "rebuild": "node-gyp rebuild",
     "rebuild:dev": "node-gyp rebuild --debug",
     "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 80,
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "arrowParens": "always",
+    "trailingComma": "es5"
   },
   "keywords": [
     "apple",
