@@ -32,13 +32,16 @@ Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
   Napi::Object obj = Napi::Object::New(env);
 
   obj.Set("hello", "world");
-  deferred.Resolve(obj);
 
-  //NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
-  //  deferred.Resolve(result);
-  //} errorHandler:^(NSError * _Nonnull error) {
-  //  //deferred.Reject(error);
-  //}];
+  NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
+    deferred.Resolve(obj);
+  } errorHandler:^(NSError * _Nonnull error) {
+    // NSString *nsErr = error.localizedDescription;
+    NSString *nsErr = [NSString stringWithFormat:@"%@", error];
+    std::string errMsg = std::string([nsErr UTF8String]);
+
+    Napi::Error::New(info.Env(), errMsg).ThrowAsJavaScriptException();
+  }];
 
   return deferred.Promise();
 }
