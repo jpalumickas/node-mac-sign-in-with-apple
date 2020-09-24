@@ -34,9 +34,11 @@ Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
 
     for (NSString* key in result) {
       NSString *value = result[key];
-      std::string napiKey = std::string([key UTF8String]);
-      Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
-      obj.Set(napiKey, napiValue);
+      if(value != nil && [value length] > 0) {
+        std::string napiKey = std::string([key UTF8String]);
+        Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
+        obj.Set(napiKey, napiValue);
+      }
     }
 
     deferred.Resolve(obj);

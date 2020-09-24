@@ -35,10 +35,10 @@
 
       NSPersonNameComponents *fullName = appleIDCredential.fullName;
       NSDictionary *userDetails = @{
-        @"firstName": fullName.givenName ?: nil,
-        @"middleName": fullName.middleName ?: nil,
-        @"lastName": fullName.familyName ?: nil,
-        @"email" : appleIDCredential.email,
+        @"firstName": fullName.givenName ?: @"",
+        @"middleName": fullName.middleName ?: @"",
+        @"lastName": fullName.familyName ?: @"",
+        @"email" : appleIDCredential.email ?: @"",
         @"idToken" : idToken,
       };
 
