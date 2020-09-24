@@ -22,11 +22,23 @@ import { signInWithApple } from 'node-mac-sign-in-with-apple';
 
 ipcMain.on('sign-in-with-apple', async () => {
   const nativeWindow = mainWindow.getNativeWindowHandle();
-  const data = await signInWithApple(nativeWindow);
+
+  try {
+    const data = await signInWithApple(nativeWindow);
+    // {
+    //   idToken: 'TOKEN',
+    //   firstName: 'John',
+    //   middleName: 'Chris',
+    //   lastName: 'Doe',
+    //   email: 'john.doe@example.com'
+    // }
+  } catch(err) {
+    // { code: 1000, message: 'Error message' }
+  }
 })
 ```
 
-> Note: Only on first login Apple returns email and user name, on other requests
+> **Note:** Only on first login Apple returns email and user name, on other requests
 > Apple returns only **idToken**
 
 
@@ -40,7 +52,7 @@ Add to entitlements.plist
 ```
 ## Thanks
 
-Big thanks to [**@dynbit**](https://github.com/dynbit) for his help!
+Big thanks to [**@dynbit**](https://github.com/dynbit) for his help and contribution!
 
 ## License
 
