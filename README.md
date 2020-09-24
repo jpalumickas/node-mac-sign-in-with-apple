@@ -38,6 +38,9 @@ Add to entitlements.plist
   <string>Default</string>
 </array>
 ```
+## Thanks
+
+Big thanks to [**@dynbit**](https://github.com/dynbit) for his help!
 
 ## License
 
