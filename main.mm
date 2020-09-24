@@ -32,28 +32,27 @@ Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
   NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
     Napi::Object obj = Napi::Object::New(env);
 
-    if ([result objectForKey:@"identityToken"] != nil) {
-      obj.Set("idToken", std::string([[result objectForKey:@"identityToken"] UTF8String]));
-    }
-
-    if ([result objectForKey:@"firstName"] != nil) {
-      obj.Set("firstName", std::string([[result objectForKey:@"firstName"] UTF8String]));
-    }
-    if ([result objectForKey:@"lastName"] != nil) {
-      obj.Set("lastName", std::string([[result objectForKey:@"lastName"] UTF8String]));
-    }
-
-    if ([result objectForKey:@"email"] != nil) {
-      obj.Set("email", std::string([[result objectForKey:@"email"] UTF8String]));
+    for (NSString* key in result) {
+      NSString *value = result[key];
+      std::string napiKey = std::string([key UTF8String]);
+      Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
+      obj.Set(napiKey, napiValue);
     }
 
     deferred.Resolve(obj);
   } errorHandler:^(NSError * _Nonnull error) {
-    // NSString *nsErr = error.localizedDescription;
-    NSString *nsErr = [NSString stringWithFormat:@"%@", error];
-    std::string errMsg = std::string([nsErr UTF8String]);
+    Napi::Object errorObj = Napi::Object::New(env);
 
-    Napi::Error::New(info.Env(), errMsg).ThrowAsJavaScriptException();
+    errorObj.Set("code", Napi::Value::From(env, error.code));
+    errorObj.Set("message", Napi::Value::From(env, [error.description UTF8String]));
+    for (NSString* key in error.userInfo) {
+      NSString *value = error.userInfo[key];
+      std::string napiKey = std::string([key UTF8String]);
+      Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
+      errorObj.Set(napiKey, napiValue);
+    }
+
+    deferred.Reject(errorObj);
   }];
 
   return deferred.Promise();

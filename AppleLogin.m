@@ -12,7 +12,7 @@
     return self;
   }
 
-  - (void)initiateLoginProcess:(void (^)(NSDictionary *result))completionHandler errorHandler:(void (^)(NSError *error))errorHandler {
+  - (void)initiateLoginProcess:(void (^)(NSDictionary<NSString *, NSString *> *result))completionHandler errorHandler:(void (^)(NSError *error))errorHandler {
     self.successBlock = completionHandler;
     self.errorBlock = errorHandler;
 
@@ -31,21 +31,15 @@
     ASAuthorizationAppleIDCredential *appleIDCredential = [authorization credential];
 
     if(appleIDCredential) {
-      NSString *idToken = [[NSString alloc]initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
+      NSString *idToken = [[NSString alloc] initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
 
-      NSString *email = [appleIDCredential valueForKey:@"email"] ?: @"";
-
-      NSDictionary *fullName = [appleIDCredential valueForKeyPath:@"fullName"] ?: [[NSDictionary alloc] initWithObjectsAndKeys:
-      @"", @"givenName", @"", @"familyName", nil];
-
-      NSString *firstName = [fullName valueForKeyPath:@"givenName"] ?: @"";
-      NSString *lastName = [fullName valueForKeyPath:@"familyName"] ?: @"";
-
-
+      NSPersonNameComponents *fullName = appleIDCredential.fullName;
       NSDictionary *userDetails = @{
-        @"userIdentifier": [appleIDCredential user],
-        @"firstName": firstName, @"lastName": lastName,
-        @"email" : email, @"identityToken" : idToken
+        @"firstName": fullName.givenName ?: nil,
+        @"middleName": fullName.middleName ?: nil,
+        @"lastName": fullName.familyName ?: nil,
+        @"email" : appleIDCredential.email,
+        @"idToken" : idToken,
       };
 
       self.successBlock(userDetails);
