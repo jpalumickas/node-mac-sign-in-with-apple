@@ -1,5 +1,5 @@
 {
-  "name": "@vietaapp/node-mac-sign-in-with-apple",
+  "name": "node-mac-sign-in-with-apple",
   "version": "0.3.0",
   "description": "A native module that allows you to Sign in with Apple in macOS",
   "main": "index.js",
@@ -12,6 +12,22 @@
   "bugs": {
     "url": "https://github.com/vietaapp/node-mac-sign-in-with-apple/issues"
   },
+  "contributors": [
+    {
+      "name": "Simonas Belickas",
+      "email": "simonas.belickas@gmail.com"
+    },
+    {
+      "name": "Justas Palumickas",
+      "email": "jpalumickas@gmail.com",
+      "url": "https://jpalumickas.com"
+    },
+    {
+      "name": "Domas Bitvinskas",
+      "email": "domas.bitvinskas@me.com",
+      "url": "https://domasbitvinskas.com"
+    }
+  ],
   "dependencies": {
     "bindings": "^1.5.0",
     "node-addon-api": "^3.0.2"
