@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "clang-format": "^1.4.0",
-    "node-gyp": "^7.1.0",
+    "node-gyp": "^7.1.2",
     "prettier": "^2.0.4"
   },
   "scripts": {
