@@ -27,6 +27,7 @@ ipcMain.on('sign-in-with-apple', async () => {
     const data = await signInWithApple(nativeWindow);
     // {
     //   idToken: 'TOKEN',
+    //   code: 'CODE',
     //   firstName: 'John',
     //   middleName: 'Chris',
     //   lastName: 'Doe',
