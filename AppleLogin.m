@@ -1,4 +1,5 @@
 #import "AppleLogin.h"
+
 @interface AppleLogin ()
 
 @property (nonatomic, strong) NSWindow *window;
@@ -32,6 +33,7 @@
 
     if(appleIDCredential) {
       NSString *idToken = [[NSString alloc] initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
+      NSString *code = [[NSString alloc] initWithData:appleIDCredential.authorizationCode encoding:NSUTF8StringEncoding];
 
       NSPersonNameComponents *fullName = appleIDCredential.fullName;
       NSDictionary *userDetails = @{
@@ -40,6 +42,7 @@
         @"lastName": fullName.familyName ?: @"",
         @"email" : appleIDCredential.email ?: @"",
         @"idToken" : idToken,
+        @"code" : code,
       };
 
       self.successBlock(userDetails);

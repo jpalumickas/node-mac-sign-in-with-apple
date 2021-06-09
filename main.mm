@@ -1,8 +1,12 @@
 #import <AuthenticationServices/AuthenticationServices.h>
 #import "./AppleLogin.h"
+
+#include <map>
 #include <napi.h>
 
-Napi::ThreadSafeFunction ts_fn;
+using namespace Napi;
+
+ThreadSafeFunction tsfn;
 
 static NSWindow *windowFromBuffer(const Napi::Buffer<uint8_t> &buffer) {
   auto data = (NSView **)buffer.Data();
@@ -10,61 +14,74 @@ static NSWindow *windowFromBuffer(const Napi::Buffer<uint8_t> &buffer) {
   return view.window;
 }
 
-Napi::Promise SignInWithApple(const Napi::CallbackInfo &info) {
+Value SignInWithApple( const CallbackInfo& info )
+{
   Napi::Env env = info.Env();
-  Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
-  if (info.Length() < 1) {
-    Napi::Error::New(info.Env(), "Wrong number of arguments")
+  if (info.Length() != 2) {
+    Error::New(info.Env(), "Wrong number of arguments")
         .ThrowAsJavaScriptException();
   }
 
-  Napi::Buffer<uint8_t> buffer = info[0].As<Napi::Buffer<uint8_t>>();
-  if (buffer.Length() != 8) {
-    Napi::Error::New(info.Env(), "Pointer buffer is invalid")
-        .ThrowAsJavaScriptException();
-  }
+  tsfn = ThreadSafeFunction::New(env, info[0].As<Function>(),
+      "Thread Safe Function", 0, 1, [](Napi::Env) {});
 
+  Napi::Buffer<uint8_t> buffer = info[1].As<Napi::Buffer<uint8_t>>();
   NSWindow *win = windowFromBuffer(buffer);
 
   AppleLogin *appleLogin = [[AppleLogin alloc] initWithWindow:win];
 
-  NSDictionary *result = [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
+  auto callback = [](Napi::Env env, Function jsCallback, std::map<std::string, std::string> *values) {
     Napi::Object obj = Napi::Object::New(env);
+
+    for (auto const& v : (*values)) {
+      obj.Set(v.first, Napi::Value::From(env, v.second));
+    }
+
+    jsCallback.Call({Value::From(env, obj)});
+
+    delete values;
+  };
+
+  [appleLogin initiateLoginProcess:^(NSDictionary * _Nonnull result) {
+    std::map<std::string, std::string> *values = new std::map<std::string, std::string>();
+    (*values)["is_error"] = "false";
 
     for (NSString* key in result) {
       NSString *value = result[key];
-
-      if(value != nil && [value length] > 0) {
-        std::string napiKey = std::string([key UTF8String]);
-        Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
-        obj.Set(napiKey, napiValue);
+      if (value != nil && [value length] > 0) {
+        std::string stringKey = std::string([key UTF8String]);
+        std::string stringValue = std::string([[NSString stringWithFormat:@"%@", value] UTF8String]);
+        (*values)[stringKey] = stringValue;
       }
     }
 
-    deferred.Resolve(obj);
-  } errorHandler:^(NSError * _Nonnull error) {
-    Napi::Object errorObj = Napi::Object::New(env);
-
-    errorObj.Set("code", Napi::Value::From(env, error.code));
-    errorObj.Set("message", Napi::Value::From(env, [error.description UTF8String]));
-    for (NSString* key in error.userInfo) {
-      NSString *value = error.userInfo[key];
-      std::string napiKey = std::string([key UTF8String]);
-      Napi::Value napiValue = Napi::Value::From(env, [[NSString stringWithFormat:@"%@", value] UTF8String]);
-      errorObj.Set(napiKey, napiValue);
+    napi_status status = tsfn.BlockingCall(values, callback);
+    if (status != napi_ok) {
+      NSLog(@"Error occured when running callback on the event loop.\n");
     }
 
-    deferred.Reject(errorObj);
+    tsfn.Release();
+  } errorHandler:^(NSError * _Nonnull error) {
+    std::map<std::string, std::string> *values = new std::map<std::string, std::string>();
+    (*values)["is_error"] = "true";
+    (*values)["code"] = std::string([[@(error.code) stringValue] UTF8String]);
+    (*values)["message"] = std::string([error.description UTF8String]);
+
+    napi_status status = tsfn.BlockingCall(values, callback);
+    if (status != napi_ok) {
+      NSLog(@"Error occured when running callback on the event loop.\n");
+    }
+
+    tsfn.Release();
   }];
 
-  return deferred.Promise();
+  return Napi::Boolean::New(env, true);
 }
 
-// Initializes all functions exposed to JS.
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "signInWithApple"),
-              Napi::Function::New(env, SignInWithApple));
+Object Init(Env env, Object exports) {
+  exports.Set(String::New(env, "signInWithApple"),
+              Function::New(env, SignInWithApple));
 
   return exports;
 }
